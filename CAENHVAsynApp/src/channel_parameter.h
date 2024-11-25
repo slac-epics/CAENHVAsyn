@@ -46,12 +46,16 @@ class IChannelParameterNumeric;
 class IChannelParameterOnOff;
 class IChannelParameterChStatus;
 class IChannelParameterBinary;
+class IChannelParameterString;
+class IChannelName;
 
 // Shared pointer types
 typedef std::shared_ptr< IChannelParameterNumeric  > ChannelParameterNumeric;
 typedef std::shared_ptr< IChannelParameterOnOff    > ChannelParameterOnOff;
 typedef std::shared_ptr< IChannelParameterChStatus > ChannelParameterChStatus;
 typedef std::shared_ptr< IChannelParameterBinary   > ChannelParameterBinary;
+typedef std::shared_ptr< IChannelParameterString   > ChannelParameterString;
+typedef std::shared_ptr< IChannelName              > ChannelName;
 
 template<typename T>
 class ChannelParameterBase
@@ -149,6 +153,31 @@ public:
     static ChannelParameterBinary create(int h, std::size_t s, std::size_t c, const std::string&  p, uint32_t m);
 
     virtual void printInfo(std::ostream& stream) const;
+};
+
+// Class for String Parameters
+class IChannelParameterString : public ChannelParameterBase<std::string>
+{
+public:
+    IChannelParameterString(int h, std::size_t s, std::size_t c, const std::string&  p, uint32_t m);
+    ~IChannelParameterString() {};
+
+    // Factory method
+    static ChannelParameterString create(int h, std::size_t s, std::size_t c, const std::string&  p, uint32_t m);
+};
+
+// Class for Channel name (not really a parameter as CAEN defines it)
+class IChannelName : public IChannelParameterString
+{
+public:
+    IChannelName(int h, std::size_t s, std::size_t c, const std::string&  p, uint32_t m);
+    ~IChannelName() {};
+
+    // Factory method
+    static ChannelName create(int h, std::size_t s, std::size_t c, const std::string&  p, uint32_t m);
+
+    virtual std::string    getVal()        const;
+    virtual void setVal(std::string value) const;
 };
 
 #endif
