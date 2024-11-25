@@ -21,18 +21,19 @@
 
 #include "channel.h"
 
-IChannel::IChannel(int h, std::size_t s, std::size_t c)
+IChannel::IChannel(int h, std::size_t s, std::size_t c, bool readOnly)
 :
     handle(h),
     slot(s),
-    channel(c)
+    channel(c),
+    readOnly(readOnly)
 {
     GetChannelParams();
 }
 
-Channel IChannel::create(int h, std::size_t s, std::size_t c)
+Channel IChannel::create(int h, std::size_t s, std::size_t c, bool readOnly)
 {
-    return std::make_shared<IChannel>(h, s, c);
+    return std::make_shared<IChannel>(h, s, c, readOnly);
 }
 
 void IChannel::printInfo(std::ostream& stream) const
@@ -98,6 +99,15 @@ void IChannel::GetChannelParams()
 
         if (CAENHV_GetChParamProp(handle, slot, channel, p[i], "Mode", &mode) != CAENHV_OK )
             throw std::runtime_error("CAENHV_GetChParamProp failed: " + std::string(CAENHV_GetError(handle)));
+
+        if (readOnly) {
+            if (mode == PARAM_MODE_RDWR) {
+                mode = PARAM_MODE_RDONLY;
+            }
+            else if (mode == PARAM_MODE_WRONLY) {
+                break;
+            }
+        }
 
         if (type == PARAM_TYPE_NUMERIC)
             channelParameterNumerics.push_back( IChannelParameterNumeric::create(handle, slot, channel, p[i], mode) );

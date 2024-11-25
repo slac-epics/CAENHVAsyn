@@ -53,11 +53,11 @@ typedef std::shared_ptr<ICrate> Crate;
 class ICrate
 {
 public:
-    ICrate(int systemType, const std::string& ipAddr, const std::string& userName, const std::string& password);
+    ICrate(int systemType, const std::string& ipAddr, const std::string& userName, const std::string& password, const bool readOnly);
     ~ICrate();
 
     // Factory method
-    static Crate create(int systemType, const std::string& ipAddr, const std::string& userName, const std::string& password);
+    static Crate create(int systemType, const std::string& ipAddr, const std::string& userName, const std::string& password, const bool readOnly);
 
     void printInfo(std::ostream& stream) const;
     void printCrateMap(std::ostream& stream) const;
@@ -78,6 +78,7 @@ private:
     void printProperties(std::ostream& stream, const std::string& type, const T& pv) const;
 
     int handle;
+    bool readOnly;
 
     // Number of slot in the crate
     std::size_t numSlots;

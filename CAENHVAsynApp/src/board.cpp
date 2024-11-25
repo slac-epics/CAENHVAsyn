@@ -21,7 +21,7 @@
 
 #include "board.h"
 
-IBoard::IBoard(int h, std::size_t s, std::string m, std::string d, std::size_t n, std::string sn, std::string fw)
+IBoard::IBoard(int h, std::size_t s, std::string m, std::string d, std::size_t n, std::string sn, std::string fw, bool readOnly)
 :
     handle(h),
     slot(s),
@@ -29,7 +29,8 @@ IBoard::IBoard(int h, std::size_t s, std::string m, std::string d, std::size_t n
     description(d),
     numChannels(n),
     serialNumber(sn),
-    firmwareRelease(fw)
+    firmwareRelease(fw),
+    readOnly(readOnly)
 {
     GetBoardParams();
     GetBoardChannels();
@@ -39,9 +40,9 @@ IBoard::~IBoard()
 {
 }
 
-Board IBoard::create(int h, std::size_t s, std::string m, std::string d, std::size_t n, std::string sn, std::string fw)
+Board IBoard::create(int h, std::size_t s, std::string m, std::string d, std::size_t n, std::string sn, std::string fw, bool readOnly)
 {
-    return std::make_shared<IBoard>(h, s, m, d, n, sn, fw);
+    return std::make_shared<IBoard>(h, s, m, d, n, sn, fw, readOnly);
 }
 
 void IBoard::printInfo(std::ostream& stream) const
@@ -116,6 +117,13 @@ void IBoard::GetBoardParams()
         if (CAENHV_GetBdParamProp(handle, slot, p[i], "Mode", &mode) != CAENHV_OK )
             throw std::runtime_error("CAENHV_GetBdParamProp failed: " + std::string(CAENHV_GetError(handle)));
 
+        if (readOnly) {
+            if (mode == PARAM_MODE_RDWR) {
+                mode = PARAM_MODE_RDONLY;
+            } else if (mode == PARAM_MODE_WRONLY) {
+                break;
+            }
+        }
 
         if (type == PARAM_TYPE_NUMERIC)
             boardParameterNumerics.push_back( IBoardParameterNumeric::create(handle, slot, p[i], mode));
@@ -137,5 +145,5 @@ void IBoard::GetBoardParams()
 void IBoard::GetBoardChannels()
 {
     for (std::size_t i(0); i < numChannels; ++i)
-        channels.push_back( IChannel::create(handle, slot, i) );
+        channels.push_back( IChannel::create(handle, slot, i, readOnly) );
 }

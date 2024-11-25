@@ -47,6 +47,13 @@ void ICrate::GetPropList()
         unsigned PropType;
         if ( CAENHV_GetSysPropInfo(handle, p, &PropMode, &PropType) == CAENHV_OK )
         {
+            if (readOnly) {
+                if (PropMode == SYSPROP_MODE_RDWR) {
+                    PropMode = SYSPROP_MODE_RDONLY;
+                } else if (PropMode == SYSPROP_MODE_WRONLY) {
+                    break;
+                }
+            }
             switch( PropType )
             {
                 case SYSPROP_TYPE_STR:
@@ -126,7 +133,7 @@ void ICrate::GetCrateMap()
             fw << unsigned(FmwRelMaxList[i]) << "." << unsigned(FmwRelMinList[i]);
 
             // Create a new Slot object and add it to the vector
-            boards.push_back( IBoard::create(handle, i, m, d, NrOfChList[i], sn.str(), fw.str()) );
+            boards.push_back( IBoard::create(handle, i, m, d, NrOfChList[i], sn.str(), fw.str(), readOnly) );
         }
     }
 
@@ -139,18 +146,19 @@ void ICrate::GetCrateMap()
     free(FmwRelMaxList);
 }
 
-ICrate::ICrate(int systemType, const std::string& ipAddr, const std::string& userName, const std::string& password)
+ICrate::ICrate(int systemType, const std::string& ipAddr, const std::string& userName, const std::string& password, const bool readOnly)
 :
-  handle(-1)
+  handle(-1),
+  readOnly(readOnly)
 {
     handle = InitSystem(systemType, ipAddr, userName, password);
     GetPropList();
     GetCrateMap();
 }
 
-Crate ICrate::create(int systemType, const std::string& ipAddr, const std::string& userName, const std::string& password)
+Crate ICrate::create(int systemType, const std::string& ipAddr, const std::string& userName, const std::string& password, const bool readOnly)
 {
-    return std::make_shared<ICrate>(systemType, ipAddr, userName, password);
+    return std::make_shared<ICrate>(systemType, ipAddr, userName, password, readOnly);
 }
 
 ICrate::~ICrate()
