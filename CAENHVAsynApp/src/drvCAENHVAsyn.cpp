@@ -24,7 +24,12 @@
 // Default value for the EPICS record prefix is an empty string,
 // which means that the autogeration is disabled.
 std::string CAENHVAsyn::epicsPrefix;
+#ifdef _WIN32
+std::string CAENHVAsyn::crateInfoFilePath = "";
+#else
 std::string CAENHVAsyn::crateInfoFilePath = "/tmp/";
+#endif
+
 
 template <typename T>
 void CAENHVAsyn::createParamFloat(T p, std::map<int, T>& list)
@@ -115,7 +120,7 @@ void CAENHVAsyn::createParamFloat(SystemPropertyFloat p, std::map<int, SystemPro
             dbParamsLocal << ",DRVL=";
             dbParamsLocal << ",DRVH=";
             dbParamsLocal << ",R="    << recordName << ":St";
-            dbLoadRecords("db/ao.template", dbParamsLocal.str().c_str());
+            dbLoadRecords("db/ao.template", dbParamsLocal.str().c_str());                                                               
         }
 
     }
