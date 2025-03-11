@@ -156,12 +156,12 @@ IChannelParameterOnOff::IChannelParameterOnOff(int h, std::size_t s, std::size_t
    char temp[30];
 
    if ( CAENHV_GetChParamProp(handle, slot, channel, param.c_str(), "Onstate", temp ) != CAENHV_OK )
-       throw std::runtime_error("CAENHV_GetBdParamProp failed: " + std::string(CAENHV_GetError(handle)));
+       throw std::runtime_error("CAENHV_GetChParamProp failed: " + std::string(CAENHV_GetError(handle)));
 
    onState = temp;
 
    if ( CAENHV_GetChParamProp(handle, slot, channel, param.c_str(), "Offstate", temp ) != CAENHV_OK )
-       throw std::runtime_error("CAENHV_GetBdParamProp failed: " + std::string(CAENHV_GetError(handle)));
+       throw std::runtime_error("CAENHV_GetChParamProp failed: " + std::string(CAENHV_GetError(handle)));
 
     offState = temp;
 
@@ -221,4 +221,46 @@ void IChannelParameterBinary::printInfo(std::ostream& stream) const
            << ", epicsParamName = "  << epicsParamName \
            << ", epicsRecordName = " << epicsRecordName \
            << std::endl;
+}
+
+// Class for String parameters
+IChannelParameterString::IChannelParameterString(int h, std::size_t s, std::size_t c, const std::string&  p, uint32_t m)
+    :
+    ChannelParameterBase<std::string>(h, s, c, p, m)
+{
+}
+
+ChannelParameterString IChannelParameterString::create(int h, std::size_t s, std::size_t c, const std::string&  p, uint32_t m)
+{
+    return std::make_shared<IChannelParameterString>(h, s, c, p, m);
+}
+
+// Class for Channel Name
+IChannelName::IChannelName(int h, std::size_t s, std::size_t c, const std::string&  p, uint32_t m)
+    :
+    IChannelParameterString(h, s, c, p, m)
+{
+}
+
+ChannelName IChannelName::create(int h, std::size_t s, std::size_t c, const std::string&  p, uint32_t m)
+{
+    return std::make_shared<IChannelName>(h, s, c, p, m);
+}
+
+std::string IChannelName::getVal() const
+{
+    char name_char[MAX_CH_NAME];
+
+    uint16_t tempChan = channel;
+    if (CAENHV_GetChName(handle, slot, 1, &tempChan, &name_char) != CAENHV_OK)
+        throw std::runtime_error("CAENHV_GetChName failed: " + std::string(CAENHV_GetError(handle)));
+
+    return std::string(name_char);
+}
+
+void IChannelName::setVal(std::string name) const
+{
+    uint16_t tempChan = channel;
+    if (CAENHV_SetChName(handle, slot, 1, &tempChan, name.c_str()) != CAENHV_OK)
+        throw std::runtime_error("CAENHV_SetChName failed: " + std::string(CAENHV_GetError(handle)));
 }
