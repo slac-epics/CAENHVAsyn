@@ -130,6 +130,8 @@ class CAENHVAsyn : public asynPortDriver
         static std::string epicsPrefix;
         // Crate information output file location
         static std::string crateInfoFilePath;
+        // Whether to only read from the device
+        static bool readOnly;
 
     private:
 

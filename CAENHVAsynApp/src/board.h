@@ -49,11 +49,11 @@ typedef std::shared_ptr<IBoard> Board;
 class IBoard
 {
 public:
-    IBoard(int h, std::size_t s, std::string m, std::string d, std::size_t n, std::string sn, std::string fw);
+    IBoard(int h, std::size_t s, std::string m, std::string d, std::size_t n, std::string sn, std::string fw, bool readOnly);
     ~IBoard();
 
     // Factory method
-    static Board create(int h, std::size_t s, std::string m, std::string d, std::size_t n, std::string sn, std::string fw);
+    static Board create(int h, std::size_t s, std::string m, std::string d, std::size_t n, std::string sn, std::string fw, bool readOnly);
 
     void printInfo(std::ostream& stream) const;
     void printBoardInfo(std::ostream& stream) const;
@@ -76,6 +76,7 @@ private:
     std::size_t                 numChannels;
     std::string                 serialNumber;
     std::string                 firmwareRelease;
+    bool                        readOnly;
 
     std::vector<BoardParameterNumeric>  boardParameterNumerics;
     std::vector<BoardParameterOnOff>    boardParameterOnOffs;

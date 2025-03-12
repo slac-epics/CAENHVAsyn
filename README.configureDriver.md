@@ -32,9 +32,11 @@ CAENHVAsynConfig(PORT_NAME, SYSTEM_TYPE, IP_ADDR, USER_NAME, PASSWORD)
 Some parameters used by the driver have default values that can be changed calling functions in your **st.cmd**. The following is a list these paramaters,
 their default values, and the function used to change them.
 
-| Parameter                                          | Default value     | Function to set a new value
-|----------------------------------------------------|-------------------|-------------------------------------
-| Name prefix used for auto-generated PVs            | (empty)           | CAENHVAsynSetEpicsPrefix(const char* prefix)
+| Parameter                                                 | Default value     | Function to set a new value
+|-----------------------------------------------------------|-------------------|-------------------------------------
+| Name prefix used for auto-generated PVs                   | (empty)           | CAENHVAsynSetEpicsPrefix(const char* prefix)
+| Read-only, if set to 1 only expose parameters for reading | 0                 | CAENHVAsynReadOnly(const int readOnly)
+
 
 You must call these functions in your **st.cmd** before calling **CAENHVAsynConfig**. The changes will apply to all instances of CAENHVAsyn you have in
 your application.
