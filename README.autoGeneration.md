@@ -92,7 +92,7 @@ For board properties of type `PARAM_TYPE_BDSTATUS`, one/two bi/bo PVs are genera
 <PREFIX>:S<SLOT_NUMBER>:<PROCESSED_SYSTEM_PARAMETER><BIT_SUFFIX>:<SUFFIX>
 ```
 
-Where the **BIT_SUFFIX** wil be different for each bit status as described in the following table:
+Where the **BIT_SUFFIX** wil be different for each bit status as described in the following tables. For SYx527 crates:
 
 Bit position    | BIT_SUFFIX    | Bit Function Description
 ----------------|---------------|---------------------------------------
@@ -108,8 +108,30 @@ Bit position    | BIT_SUFFIX    | Bit Function Description
   9             | _IT           | Channel is in internal trip
  10             | _CE           | Channel is in calibration error
  11             | _UN           | Channel is unplugged
+ 13             | _OVP          | Channel is in OverVoltage Protection
+ 14             | _PF           | Channel is in Power Fail
+ 15             | _TE           | Channel is in Temperature Error
 
+And for Smart HV crates:
 
+Bit position    | BIT_SUFFIX    | Bit Function Description
+----------------|---------------|---------------------------------------
+  0             | _ON           | Channel is on
+  1             | _RU           | Channel is ramping up
+  2             | _RD           | Channel is ramping down
+  3             | _OC           | Channel is in overcurrent
+  4             | _OV           | Channel is in overvoltage
+  5             | _UV           | Channel is in undervoltage
+  6             | _ET           | Channel is in external trip
+  7             | _OP           | Channel power exceeds max power
+  8             | _TW           | Channel is in Temperature Warning
+  9             | _TE           | Channel is in Temperature Error
+ 10             | _KL           | Channel switch is in KILL position
+ 11             | _ED           | Channel is in external disable
+ 12             | _DS           | Channel is disabled
+ 13             | _FL           | Channel is in generic failure mode
+ 14             | _LK           | Channel is locked (local mode)
+ 15             | _VL           | Channel is voltage limited (via trimmer)
 
 ### Channel Parameters
 
