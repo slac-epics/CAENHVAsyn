@@ -77,8 +77,8 @@ statusRecordMap_t recordFieldBdParamChStatus =
     { 0x400, std::pair<std::string,std::string>( "_CE", "Ch is in calibration error" ) },
     { 0x800, std::pair<std::string,std::string>( "_UN", "Ch is unplugged"            ) },
 };
-// - This map is for Channel parameters of type 'PARAM_TYPE_CHSTATUS'
-statusRecordMap_t   recordFieldChParamChStatus =
+// - This map is for Channel parameters of type 'PARAM_TYPE_CHSTATUS' for x527 boards
+statusRecordMap_t   recordFieldChParamChStatusX527 =
 {
     { 0x0001, std::pair<std::string,std::string>( "_ON", "Ch is on"                         ) },
     { 0x0002, std::pair<std::string,std::string>( "_RU", "Ch is ramping up"                 ) },
@@ -95,6 +95,27 @@ statusRecordMap_t   recordFieldChParamChStatus =
     { 0x2000, std::pair<std::string,std::string>( "_OVP", "Ch is in OverVoltage Protection" ) },
     { 0x4000, std::pair<std::string,std::string>( "_PF", "Ch is in Power Fail"              ) },
     { 0x8000, std::pair<std::string,std::string>( "_TE", "Ch is in Temperature Error"       ) },
+};
+// - This map is for Channel parameters of type 'PARAM_TYPE_CHSTATUS'
+statusRecordMap_t   recordFieldChParamChStatusSMART =
+{
+    { 0x0001, std::pair<std::string,std::string>( "_ON", "Ch is on"                         ) },
+    { 0x0002, std::pair<std::string,std::string>( "_RU", "Ch is ramping up"                 ) },
+    { 0x0004, std::pair<std::string,std::string>( "_RD", "Ch is ramping down"               ) },
+    { 0x0008, std::pair<std::string,std::string>( "_OC", "Ch is in overcurrent"             ) },
+    { 0x0010, std::pair<std::string,std::string>( "_OV", "Ch is in overvoltage"             ) },
+    { 0x0020, std::pair<std::string,std::string>( "_UV", "Ch is in undervoltage"            ) },
+    { 0x0040, std::pair<std::string,std::string>( "_ET", "Ch is in external trip"           ) },
+    { 0x0080, std::pair<std::string,std::string>( "_OP", "Ch power exceeds max power"       ) },
+    { 0x0100, std::pair<std::string,std::string>( "_TW", "Ch is in Temperature Warning"     ) },
+    { 0x0200, std::pair<std::string,std::string>( "_TE", "Ch is in Temperature Error"       ) },
+    { 0x0400, std::pair<std::string,std::string>( "_KL", "Ch switch is in KILL position"    ) },
+    { 0x0800, std::pair<std::string,std::string>( "_ED", "Ch is in external disable"        ) },
+    { 0x1000, std::pair<std::string,std::string>( "_DS", "Ch is disabled"                   ) },
+    { 0x2000, std::pair<std::string,std::string>( "_FL", "Ch is in generic failure mode"    ) },
+    { 0x4000, std::pair<std::string,std::string>( "_LK", "Ch is unplugged"                  ) },
+    { 0x2000, std::pair<std::string,std::string>( "_OVP", "Ch is in OverVoltage Protection" ) },
+    { 0x4000, std::pair<std::string,std::string>( "_PF", "Ch is in Power Fail"              ) },
 };
 
 // Map used to generate binary records for the system parameters of type 'PARAM_TYPE_BDSTATUS'.

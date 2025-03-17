@@ -423,7 +423,12 @@ CAENHVAsyn::CAENHVAsyn(const std::string& portName, int systemType, const std::s
 
             std::vector<ChannelParameterChStatus> cpcs = (*channelIt)->getChannelParameterChStatuses();
             for (std::vector<ChannelParameterChStatus>::iterator paramIt = cpcs.begin(); paramIt != cpcs.end(); ++paramIt)
-                createParamMBinary<ChannelParameterChStatus>(*paramIt, channelParameterChStatusList, recordFieldChParamChStatus);
+                if ( (systemType >= 0) && (systemType<=3) ){
+                    createParamMBinary<ChannelParameterChStatus>(*paramIt, channelParameterChStatusList, recordFieldChParamChStatusX527);
+                }
+                else if (systemType == 13){
+                    createParamMBinary<ChannelParameterChStatus>(*paramIt, channelParameterChStatusList, recordFieldChParamChStatusSMART);
+                }
 
             std::vector<ChannelParameterBinary> cpb = (*channelIt)->getChannelParameterBinaries();
             for (std::vector<ChannelParameterBinary>::iterator paramIt = cpb.begin(); paramIt != cpb.end(); ++paramIt)
