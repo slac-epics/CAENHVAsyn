@@ -113,9 +113,8 @@ statusRecordMap_t   recordFieldChParamChStatusSMART =
     { 0x0800, std::pair<std::string,std::string>( "_ED", "Ch is in external disable"        ) },
     { 0x1000, std::pair<std::string,std::string>( "_DS", "Ch is disabled"                   ) },
     { 0x2000, std::pair<std::string,std::string>( "_FL", "Ch is in generic failure mode"    ) },
-    { 0x4000, std::pair<std::string,std::string>( "_LK", "Ch is unplugged"                  ) },
-    { 0x2000, std::pair<std::string,std::string>( "_OVP", "Ch is in OverVoltage Protection" ) },
-    { 0x4000, std::pair<std::string,std::string>( "_PF", "Ch is in Power Fail"              ) },
+    { 0x4000, std::pair<std::string,std::string>( "_LK", "Ch is locked (local mode)"        ) },
+    { 0x8000, std::pair<std::string,std::string>( "_VL", "Ch is volt limited (via trimmer)" ) },
 };
 
 // Map used to generate binary records for the system parameters of type 'PARAM_TYPE_BDSTATUS'.
