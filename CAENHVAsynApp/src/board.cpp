@@ -130,8 +130,11 @@ void IBoard::GetBoardParams()
             std::cerr << "Error found when creating a Board Parameter object for pamater '" << p[i] << "'. Unsupported type = " << type << std::endl;
     }
 
+    // Memory allocated across CRTs can cause issues on Windows
+#ifndef _WIN32
     // Deallocate memory (Use RAII in the future for this)
     free(ParNameList);
+#endif
 }
 
 void IBoard::GetBoardChannels()

@@ -26,10 +26,16 @@ LIB_LIBS += asyn
 #=====================================================
 # Path to "NON EPICS" External PACKAGES: USER INCLUDES
 #======================================================
+
 USR_INCLUDES = $(addprefix -I,$(CAENHVWRAPPER_INCLUDE))
 caenhvwrapper_DIR = $(CAENHVWRAPPER_LIB)
 USR_LIBS_Linux += caenhvwrapper
-#======================================================
+
+LIB_LIBS_WIN32 += caenhvwrapper
+BIN_INSTALLS_WIN32 += $(wildcard $(CAENHVWRAPPER_DLL)/*.dll)
+LIB_INSTALLS_WIN32 += $(wildcard $(CAENHVWRAPPER_LIB)/*.lib)
+LIB_SYS_LIBS_WIN32 += ws2_32
+LIB_LIBS_WIN32 += $(EPICS_BASE_IOC_LIBS)
 
 #===========================
 
