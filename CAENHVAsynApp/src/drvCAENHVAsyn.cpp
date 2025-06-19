@@ -21,6 +21,14 @@
 
 #include "drvCAENHVAsyn.h"
 
+// Connection monitor task
+static void connMonC(void *drvPvt)
+{
+    CAENHVAsyn *pPvt = (CAENHVAsyn *)drvPvt;
+
+    pPvt->connMon();
+}
+
 // Default value for the EPICS record prefix is an empty string,
 // which means that the autogeration is disabled.
 std::string CAENHVAsyn::epicsPrefix;
@@ -430,6 +438,58 @@ CAENHVAsyn::CAENHVAsyn(const std::string& portName, int systemType, const std::s
                 createParamInteger<ChannelParameterBinary>(*paramIt, channelParameterBinaryList);
         }
     }
+
+    // Create connection monitor thread
+    bool status = (epicsThreadCreate("connMon",
+            epicsThreadPriorityMedium,
+            epicsThreadGetStackSize(epicsThreadStackMedium),
+            (EPICSTHREADFUNC)connMonC,
+            this) == NULL);
+    if (status) {
+        printf("%s:%s epicsThreadCreate failure for connMon task\n",
+            this->driverName_.c_str(), this->driverName_.c_str());
+        return;
+    }
+
+}
+
+/**
+ * Resets connection if too many failed gets are detected.
+ * Assumes the system is the same, so doesn't call GetPropList() or GetCrateMap()
+ * ( See ICrate::ICrate() constructor )
+ */
+void CAENHVAsyn::connMon() {
+
+    int fails, count = 0;
+    const int count_limit = 500, allowed_fails = 10;
+
+    while (true) {
+
+        // Avoid accumulating fails that have nothing to do with disconnection
+        if (count >= count_limit) {
+            epicsAtomicSetIntT(&this->failed_gets, 0);
+            count = 0;
+        }
+
+        fails = epicsAtomicGetIntT(&this->failed_gets);
+        if (fails > allowed_fails) {
+            asynPrint(pasynUserSelf, ASYN_TRACE_FLOW, \
+                "Driver '%s', Port '%s': reinitializing hardware connection\n", \
+                this->driverName_.c_str(), this->portName_.c_str());
+            this->lock();
+            this->crate->ReinitSystem();
+            epicsAtomicSetIntT(&this->failed_gets, 0);
+            this->unlock();
+            asynPrint(pasynUserSelf, ASYN_TRACE_FLOW, \
+                "Driver '%s', Port '%s': finished reinitializing hardware connection\n", \
+                this->driverName_.c_str(), this->portName_.c_str());
+        }
+
+        epicsThreadSleep(1);
+        ++count;
+
+    }
+
 }
 
 ////////////////////////////////////////////
@@ -465,6 +525,7 @@ asynStatus CAENHVAsyn::readInt32(asynUser *pasynUser, epicsInt32 *value)
     catch(std::runtime_error& e)
     {
         status = -1;
+        epicsAtomicIncrIntT(&this->failed_gets);
         asynPrint(pasynUser, ASYN_TRACE_ERROR, \
                     "Driver '%s', Port '%s', Method '%s', Function number '%d', parameter '%s' : exception caught '%s'\n", \
                     this->driverName_.c_str(), this->portName_.c_str(), method.c_str(), function, name, e.what());
@@ -523,6 +584,7 @@ asynStatus CAENHVAsyn::writeInt32(asynUser *pasynUser, epicsInt32 value)
     catch(std::runtime_error& e)
     {
         status = -1;
+        epicsAtomicIncrIntT(&this->failed_gets);
         asynPrint(pasynUser, ASYN_TRACE_ERROR, \
                     "Driver '%s', Port '%s', Method '%s', Function number '%d', parameter '%s' : exception caught '%s'\n", \
                     this->driverName_.c_str(), this->portName_.c_str(), method.c_str(), function, name, e.what());
@@ -593,6 +655,7 @@ asynStatus CAENHVAsyn::readFloat64(asynUser *pasynUser, epicsFloat64 *value)
     catch(std::runtime_error& e)
     {
         status = -1;
+        epicsAtomicIncrIntT(&this->failed_gets);
         asynPrint(pasynUser, ASYN_TRACE_ERROR, \
                     "Driver '%s', Port '%s', Method '%s', Function number '%d', parameter '%s' : exception caught '%s'\n", \
                     this->driverName_.c_str(), this->portName_.c_str(), method.c_str(), function, name, e.what());
@@ -663,6 +726,7 @@ asynStatus CAENHVAsyn::writeFloat64(asynUser *pasynUser, epicsFloat64 value)
     catch(std::runtime_error& e)
     {
         status = -1;
+        epicsAtomicIncrIntT(&this->failed_gets);
         asynPrint(pasynUser, ASYN_TRACE_ERROR, \
                     "Driver '%s', Port '%s', Method '%s', Function number '%d', parameter '%s' : exception caught '%s'\n", \
                     this->driverName_.c_str(), this->portName_.c_str(), method.c_str(), function, name, e.what());
@@ -755,6 +819,7 @@ asynStatus CAENHVAsyn::readUInt32Digital(asynUser *pasynUser, epicsUInt32 *value
     catch(std::runtime_error& e)
     {
         status = -1;
+        epicsAtomicIncrIntT(&this->failed_gets);
         asynPrint(pasynUser, ASYN_TRACE_ERROR, \
                     "Driver '%s', Port '%s', Method '%s', Function number '%d', parameter '%s' : exception caught '%s'\n", \
                     this->driverName_.c_str(), this->portName_.c_str(), method.c_str(), function, name, e.what());
@@ -842,6 +907,7 @@ asynStatus CAENHVAsyn::writeUInt32Digital(asynUser *pasynUser, epicsUInt32 value
     catch(std::runtime_error& e)
     {
         status = -1;
+        epicsAtomicIncrIntT(&this->failed_gets);
         asynPrint(pasynUser, ASYN_TRACE_ERROR, \
                     "Driver '%s', Port '%s', Method '%s', Function number '%d', parameter '%s' : exception caught '%s'\n", \
                     this->driverName_.c_str(), this->portName_.c_str(), method.c_str(), function, name, e.what());
@@ -902,6 +968,7 @@ asynStatus CAENHVAsyn::readOctet(asynUser *pasynUser, char *value, size_t maxCha
     catch(std::runtime_error& e)
     {
         status = -1;
+        epicsAtomicIncrIntT(&this->failed_gets);
         asynPrint(pasynUser, ASYN_TRACE_ERROR, \
                     "Driver '%s', Port '%s', Method '%s', Function number '%d', parameter '%s' : exception caught '%s'\n", \
                     this->driverName_.c_str(), this->portName_.c_str(), method.c_str(), function, name, e.what());
@@ -962,6 +1029,7 @@ asynStatus CAENHVAsyn::writeOctet(asynUser *pasynUser, const char *value, size_t
     catch(std::runtime_error& e)
     {
         status = -1;
+        epicsAtomicIncrIntT(&this->failed_gets);
         asynPrint(pasynUser, ASYN_TRACE_ERROR, \
                     "Driver '%s', Port '%s', Method '%s', Function number '%d', parameter '%s' : exception caught '%s'\n", \
                     this->driverName_.c_str(), this->portName_.c_str(), method.c_str(), function, name, e.what());

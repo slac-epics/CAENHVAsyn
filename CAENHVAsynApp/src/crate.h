@@ -61,6 +61,7 @@ public:
 
     void printInfo(std::ostream& stream) const;
     void printCrateMap(std::ostream& stream) const;
+    void ReinitSystem();
 
     std::vector<SystemPropertyInteger> getSystemPropertyIntegers() { return systemPropertyIntegers; };
     std::vector<SystemPropertyFloat>   getSystemPropertyFloats()   { return systemPropertyFloats;   };
@@ -70,7 +71,7 @@ public:
 
 private:
 
-    int  InitSystem(int systemType, const std::string& ipAddr, const std::string& userName, const std::string& password) const;
+    int  InitSystem() const;
     void GetPropList();
     void GetCrateMap();
 
@@ -78,6 +79,8 @@ private:
     void printProperties(std::ostream& stream, const std::string& type, const T& pv) const;
 
     int handle;
+    int systemType_;
+    std::string ipAddr_, userName_, password_;
 
     // Number of slot in the crate
     std::size_t numSlots;
