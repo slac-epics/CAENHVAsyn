@@ -439,6 +439,13 @@ CAENHVAsyn::CAENHVAsyn(const std::string& portName, int systemType, const std::s
         }
     }
 
+    asynStatus param_status = this->createReconnParams();
+    if (param_status != asynSuccess) {
+        asynPrint(pasynUserSelf, ASYN_TRACE_FLOW, \
+            "Driver '%s', Port '%s': createReconnParams failed. Status code %d\n", \
+            this->driverName_.c_str(), this->portName_.c_str(), (int)param_status);
+    }
+
     // Create connection monitor thread
     bool status = (epicsThreadCreate("connMon",
             epicsThreadPriorityMedium,
@@ -453,6 +460,22 @@ CAENHVAsyn::CAENHVAsyn(const std::string& portName, int systemType, const std::s
 
 }
 
+asynStatus CAENHVAsyn::createReconnParams() {
+
+    int status = (int)asynSuccess;
+
+    status = createParam("FAILED_COUNT_LIMIT", asynParamInt32, &fail_count_limit);
+    status |= createParam("ALLOWED_FAILS", asynParamInt32, &allowed_fails_param);
+    status |= createParam("MON_THREAD_SLEEP", asynParamFloat64, &mon_thread_sleep_param);
+
+    setIntegerParam(fail_count_limit, 500);
+    setIntegerParam(allowed_fails_param, 10);
+    setDoubleParam(mon_thread_sleep_param, 1);
+
+    return (asynStatus)status;
+
+}
+
 /**
  * Resets connection if too many failed gets are detected.
  * Assumes the system is the same, so doesn't call GetPropList() or GetCrateMap()
@@ -460,10 +483,14 @@ CAENHVAsyn::CAENHVAsyn(const std::string& portName, int systemType, const std::s
  */
 void CAENHVAsyn::connMon() {
 
-    int fails, count = 0;
-    const int count_limit = 500, allowed_fails = 10;
+    int fails, count_limit, allowed_fails, count = 0;
+    double monitor_thread_sleep;
 
     while (true) {
+
+        getIntegerParam(fail_count_limit, &count_limit);
+        getIntegerParam(allowed_fails_param, &allowed_fails);
+        getDoubleParam(mon_thread_sleep_param, &monitor_thread_sleep);
 
         // Avoid accumulating fails that have nothing to do with disconnection
         if (count >= count_limit) {
@@ -485,7 +512,7 @@ void CAENHVAsyn::connMon() {
                 this->driverName_.c_str(), this->portName_.c_str());
         }
 
-        epicsThreadSleep(1);
+        epicsThreadSleep(monitor_thread_sleep);
         ++count;
 
     }
@@ -514,21 +541,26 @@ asynStatus CAENHVAsyn::readInt32(asynUser *pasynUser, epicsInt32 *value)
     bool found = false;
 
     // Look for the function number in the parameter lists
-    try
-    {
-        if ( ( spIt = systemPropertyIntegerList.find(function) ) != systemPropertyIntegerList.end() )
+    if (function == fail_count_limit || function == allowed_fails_param) {
+        found = true;
+        status = getIntegerParam(function, value);
+    } else {
+        try
         {
-            *value = spIt->second->getVal();
-            found = true;
+            if ( ( spIt = systemPropertyIntegerList.find(function) ) != systemPropertyIntegerList.end() )
+            {
+                *value = spIt->second->getVal();
+                found = true;
+            }
         }
-    }
-    catch(std::runtime_error& e)
-    {
-        status = -1;
-        epicsAtomicIncrIntT(&this->failed_gets);
-        asynPrint(pasynUser, ASYN_TRACE_ERROR, \
-                    "Driver '%s', Port '%s', Method '%s', Function number '%d', parameter '%s' : exception caught '%s'\n", \
-                    this->driverName_.c_str(), this->portName_.c_str(), method.c_str(), function, name, e.what());
+        catch(std::runtime_error& e)
+        {
+            status = -1;
+            epicsAtomicIncrIntT(&this->failed_gets);
+            asynPrint(pasynUser, ASYN_TRACE_ERROR, \
+                        "Driver '%s', Port '%s', Method '%s', Function number '%d', parameter '%s' : exception caught '%s'\n", \
+                        this->driverName_.c_str(), this->portName_.c_str(), method.c_str(), function, name, e.what());
+        }
     }
 
     // If the function was not found, fall back to the base method
@@ -573,21 +605,26 @@ asynStatus CAENHVAsyn::writeInt32(asynUser *pasynUser, epicsInt32 value)
     bool found = false;
 
     // Look for the function number in the parameter lists
-    try
-    {
-        if ( ( spIt = systemPropertyIntegerList.find(function) ) != systemPropertyIntegerList.end() )
+    if (function == fail_count_limit || function == allowed_fails_param) {
+        found = true;
+        status = setIntegerParam(function, value);
+    } else {
+        try
         {
-            spIt->second->setVal(value);
-            found = true;
+            if ( ( spIt = systemPropertyIntegerList.find(function) ) != systemPropertyIntegerList.end() )
+            {
+                spIt->second->setVal(value);
+                found = true;
+            }
         }
-    }
-    catch(std::runtime_error& e)
-    {
-        status = -1;
-        epicsAtomicIncrIntT(&this->failed_gets);
-        asynPrint(pasynUser, ASYN_TRACE_ERROR, \
-                    "Driver '%s', Port '%s', Method '%s', Function number '%d', parameter '%s' : exception caught '%s'\n", \
-                    this->driverName_.c_str(), this->portName_.c_str(), method.c_str(), function, name, e.what());
+        catch(std::runtime_error& e)
+        {
+            status = -1;
+            epicsAtomicIncrIntT(&this->failed_gets);
+            asynPrint(pasynUser, ASYN_TRACE_ERROR, \
+                        "Driver '%s', Port '%s', Method '%s', Function number '%d', parameter '%s' : exception caught '%s'\n", \
+                        this->driverName_.c_str(), this->portName_.c_str(), method.c_str(), function, name, e.what());
+        }
     }
 
     // If the function was not found, fall back to the base method
@@ -634,31 +671,36 @@ asynStatus CAENHVAsyn::readFloat64(asynUser *pasynUser, epicsFloat64 *value)
     bool found = false;
 
     // Look for the function number in the parameter lists
-    try
-    {
-        if ( ( cpIt = channelParameterNumericList.find(function) ) != channelParameterNumericList.end() )
+    if (function == mon_thread_sleep_param) {
+        found = true;
+        status = (int)getDoubleParam(mon_thread_sleep_param, value);
+    } else {
+        try
         {
-            *value = cpIt->second->getVal();
-            found = true;
+            if ( ( cpIt = channelParameterNumericList.find(function) ) != channelParameterNumericList.end() )
+            {
+                *value = cpIt->second->getVal();
+                found = true;
+            }
+            else if ( ( bpIt = boardParameterNumericList.find(function) ) != boardParameterNumericList.end() )
+            {
+                *value = bpIt->second->getVal();
+                found = true;
+            }
+            else if ( ( spIt = systemPropertyFloatList.find(function) ) != systemPropertyFloatList.end() )
+            {
+                *value = spIt->second->getVal();
+                found = true;
+            }
         }
-        else if ( ( bpIt = boardParameterNumericList.find(function) ) != boardParameterNumericList.end() )
+        catch(std::runtime_error& e)
         {
-            *value = bpIt->second->getVal();
-            found = true;
+            status = -1;
+            epicsAtomicIncrIntT(&this->failed_gets);
+            asynPrint(pasynUser, ASYN_TRACE_ERROR, \
+                        "Driver '%s', Port '%s', Method '%s', Function number '%d', parameter '%s' : exception caught '%s'\n", \
+                        this->driverName_.c_str(), this->portName_.c_str(), method.c_str(), function, name, e.what());
         }
-        else if ( ( spIt = systemPropertyFloatList.find(function) ) != systemPropertyFloatList.end() )
-        {
-            *value = spIt->second->getVal();
-            found = true;
-        }
-    }
-    catch(std::runtime_error& e)
-    {
-        status = -1;
-        epicsAtomicIncrIntT(&this->failed_gets);
-        asynPrint(pasynUser, ASYN_TRACE_ERROR, \
-                    "Driver '%s', Port '%s', Method '%s', Function number '%d', parameter '%s' : exception caught '%s'\n", \
-                    this->driverName_.c_str(), this->portName_.c_str(), method.c_str(), function, name, e.what());
     }
 
     // If the function was not found, fall back to the base method
@@ -705,31 +747,36 @@ asynStatus CAENHVAsyn::writeFloat64(asynUser *pasynUser, epicsFloat64 value)
     bool found = false;
 
     // Look for the function number in the parameter lists
-    try
-    {
-        if ( ( cpIt = channelParameterNumericList.find(function) ) != channelParameterNumericList.end() )
+    if (function == mon_thread_sleep_param) {
+        found = true;
+        status = setDoubleParam(function, value);
+    } else {
+        try
         {
-            cpIt->second->setVal(value);
-            found = true;
+            if ( ( cpIt = channelParameterNumericList.find(function) ) != channelParameterNumericList.end() )
+            {
+                cpIt->second->setVal(value);
+                found = true;
+            }
+            else if ( ( bpIt = boardParameterNumericList.find(function) ) != boardParameterNumericList.end() )
+            {
+                bpIt->second->setVal(value);
+                found = true;
+            }
+            else if ( ( spIt = systemPropertyFloatList.find(function) ) != systemPropertyFloatList.end() )
+            {
+                spIt->second->setVal(value);
+                found = true;
+            }
         }
-        else if ( ( bpIt = boardParameterNumericList.find(function) ) != boardParameterNumericList.end() )
+        catch(std::runtime_error& e)
         {
-            bpIt->second->setVal(value);
-            found = true;
+            status = -1;
+            epicsAtomicIncrIntT(&this->failed_gets);
+            asynPrint(pasynUser, ASYN_TRACE_ERROR, \
+                        "Driver '%s', Port '%s', Method '%s', Function number '%d', parameter '%s' : exception caught '%s'\n", \
+                        this->driverName_.c_str(), this->portName_.c_str(), method.c_str(), function, name, e.what());
         }
-        else if ( ( spIt = systemPropertyFloatList.find(function) ) != systemPropertyFloatList.end() )
-        {
-            spIt->second->setVal(value);
-            found = true;
-        }
-    }
-    catch(std::runtime_error& e)
-    {
-        status = -1;
-        epicsAtomicIncrIntT(&this->failed_gets);
-        asynPrint(pasynUser, ASYN_TRACE_ERROR, \
-                    "Driver '%s', Port '%s', Method '%s', Function number '%d', parameter '%s' : exception caught '%s'\n", \
-                    this->driverName_.c_str(), this->portName_.c_str(), method.c_str(), function, name, e.what());
     }
 
     // If the function was not found, fall back to the base method

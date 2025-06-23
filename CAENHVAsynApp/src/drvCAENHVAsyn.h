@@ -155,6 +155,12 @@ class CAENHVAsyn : public asynPortDriver
 
         // Crate object
         Crate crate;
+
+        //Reconnection monitor and processing
+        asynStatus createReconnParams();
+        int fail_count_limit;
+        int allowed_fails_param;
+        int mon_thread_sleep_param;
         int failed_gets{0};
 
        // System property lists
