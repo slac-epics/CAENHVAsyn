@@ -37,6 +37,7 @@
 #include <arpa/inet.h>
 #include <iostream>
 
+#include "asynPortDriver.h"
 #include "CAENHVWrapper.h"
 #include "common.h"
 #include "board.h"
@@ -61,7 +62,7 @@ public:
 
     void printInfo(std::ostream& stream) const;
     void printCrateMap(std::ostream& stream) const;
-    void ReinitSystem();
+    void ReinitSystem(asynUser *pasynUser);
 
     std::vector<SystemPropertyInteger> getSystemPropertyIntegers() { return systemPropertyIntegers; };
     std::vector<SystemPropertyFloat>   getSystemPropertyFloats()   { return systemPropertyFloats;   };

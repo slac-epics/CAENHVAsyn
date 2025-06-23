@@ -477,7 +477,7 @@ void CAENHVAsyn::connMon() {
                 "Driver '%s', Port '%s': reinitializing hardware connection\n", \
                 this->driverName_.c_str(), this->portName_.c_str());
             this->lock();
-            this->crate->ReinitSystem();
+            this->crate->ReinitSystem(pasynUserSelf);
             epicsAtomicSetIntT(&this->failed_gets, 0);
             this->unlock();
             asynPrint(pasynUserSelf, ASYN_TRACE_FLOW, \

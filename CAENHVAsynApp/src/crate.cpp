@@ -181,13 +181,27 @@ int ICrate::InitSystem() const
 }
 
 /**
- * Reinitializes system in case connection was lost.
+ * @brief Reinitializes system in case connection was lost.
  * Assumes system is the same, so doesn't call GetPropList() or GetCrateMap()
+ *
+ * @param pasynUser pointer to asynUser to be used by asynPrint
  */
-void ICrate::ReinitSystem() {
+void ICrate::ReinitSystem(asynUser *pasynUser) {
 
     CAENHV_DeinitSystem(this->handle);
-    this->handle = this->InitSystem();
+
+    bool error = true;
+    while (error) {
+
+        try {
+            this->handle = this->InitSystem();
+            error = false;
+        } catch (std::runtime_error& e) {
+            asynPrint(pasynUser, ASYN_TRACE_ERROR, \
+                "ICrate::ReinitSystem: failed to initialize system. Error: '%s'. Trying again...\n", e.what());
+        }
+
+    }
 
 }
 
