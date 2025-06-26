@@ -46,3 +46,20 @@ record(ai, "$(P)$(R)MonThreadSleep-R") {
     field(DTYP, "asynFloat64")
     field(INP,  "@asyn($(PORT),$(ADDR=0),$(TIMEOUT=1))MON_THREAD_SLEEP")
 }
+
+# Time to sleep before trying reconnection again if reconnection
+# failed
+record(ao, "$(P)$(R)RecFailSleep-S") {
+    field(DESC, "Sleep before trying reconn after fail")
+    field(VAL,  "5")
+    field(DTYP, "asynFloat64")
+    field(FLNK, "$(P)$(R)RecFailSleep-R")
+    field(OUT,  "@asyn($(PORT),$(ADDR=0),$(TIMEOUT=1))CONN_FAIL_SLEEP")
+}
+
+record(ai, "$(P)$(R)RecFailSleep-R") {
+    field(DESC, "Sleep before trying reconn after fail")
+    field(PINI, "YES")
+    field(DTYP, "asynFloat64")
+    field(INP,  "@asyn($(PORT),$(ADDR=0),$(TIMEOUT=1))CONN_FAIL_SLEEP")
+}

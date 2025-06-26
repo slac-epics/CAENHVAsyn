@@ -161,6 +161,7 @@ class CAENHVAsyn : public asynPortDriver
         int fail_count_limit;
         int allowed_fails_param;
         int mon_thread_sleep_param;
+        int conn_fail_sleep;
         int failed_gets{0};
 
        // System property lists

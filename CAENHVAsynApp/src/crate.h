@@ -62,7 +62,7 @@ public:
 
     void printInfo(std::ostream& stream) const;
     void printCrateMap(std::ostream& stream) const;
-    void ReinitSystem(asynUser *pasynUser);
+    void ReinitSystem();
 
     std::vector<SystemPropertyInteger> getSystemPropertyIntegers() { return systemPropertyIntegers; };
     std::vector<SystemPropertyFloat>   getSystemPropertyFloats()   { return systemPropertyFloats;   };

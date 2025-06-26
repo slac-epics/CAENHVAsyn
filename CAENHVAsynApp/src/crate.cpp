@@ -186,22 +186,13 @@ int ICrate::InitSystem() const
  *
  * @param pasynUser pointer to asynUser to be used by asynPrint
  */
-void ICrate::ReinitSystem(asynUser *pasynUser) {
+void ICrate::ReinitSystem() {
 
-    CAENHV_DeinitSystem(this->handle);
-
-    bool error = true;
-    while (error) {
-
-        try {
-            this->handle = this->InitSystem();
-            error = false;
-        } catch (std::runtime_error& e) {
-            asynPrint(pasynUser, ASYN_TRACE_ERROR, \
-                "ICrate::ReinitSystem: failed to initialize system. Error: '%s'. Trying again...\n", e.what());
-        }
-
+    if (this->handle != -1) {
+        CAENHV_DeinitSystem(this->handle);
+        this->handle = -1;
     }
+    this->handle = this->InitSystem();
 
 }
 

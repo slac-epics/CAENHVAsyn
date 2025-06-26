@@ -467,10 +467,12 @@ asynStatus CAENHVAsyn::createReconnParams() {
     status = createParam("FAILED_COUNT_LIMIT", asynParamInt32, &fail_count_limit);
     status |= createParam("ALLOWED_FAILS", asynParamInt32, &allowed_fails_param);
     status |= createParam("MON_THREAD_SLEEP", asynParamFloat64, &mon_thread_sleep_param);
+    status |= createParam("CONN_FAIL_SLEEP", asynParamFloat64, &conn_fail_sleep);
 
     setIntegerParam(fail_count_limit, 500);
     setIntegerParam(allowed_fails_param, 10);
     setDoubleParam(mon_thread_sleep_param, 1);
+    setDoubleParam(conn_fail_sleep, 5);
 
     return (asynStatus)status;
 
@@ -484,13 +486,14 @@ asynStatus CAENHVAsyn::createReconnParams() {
 void CAENHVAsyn::connMon() {
 
     int fails, count_limit, allowed_fails, count = 0;
-    double monitor_thread_sleep;
+    double monitor_thread_sleep, sleep_after_fail;
 
     while (true) {
 
         getIntegerParam(fail_count_limit, &count_limit);
         getIntegerParam(allowed_fails_param, &allowed_fails);
         getDoubleParam(mon_thread_sleep_param, &monitor_thread_sleep);
+        getDoubleParam(conn_fail_sleep, &sleep_after_fail);
 
         // Avoid accumulating fails that have nothing to do with disconnection
         if (count >= count_limit) {
@@ -504,7 +507,18 @@ void CAENHVAsyn::connMon() {
                 "Driver '%s', Port '%s': reinitializing hardware connection\n", \
                 this->driverName_.c_str(), this->portName_.c_str());
             this->lock();
-            this->crate->ReinitSystem(pasynUserSelf);
+            bool error = true;
+            while (error) {
+                try {
+                    this->crate->ReinitSystem();
+                    error = false;
+                } catch (const std::runtime_error& err) {
+                    asynPrint(pasynUserSelf, ASYN_TRACE_ERROR,
+                        "Driver %s, Port %s: Failed to reinitialize hardware connection. Trying again in %f seconds.\n",
+                        this->driverName_.c_str(), this->portName_.c_str(), sleep_after_fail);
+                    epicsThreadSleep(sleep_after_fail);
+                }
+            }
             epicsAtomicSetIntT(&this->failed_gets, 0);
             this->unlock();
             asynPrint(pasynUserSelf, ASYN_TRACE_FLOW, \
@@ -671,9 +685,9 @@ asynStatus CAENHVAsyn::readFloat64(asynUser *pasynUser, epicsFloat64 *value)
     bool found = false;
 
     // Look for the function number in the parameter lists
-    if (function == mon_thread_sleep_param) {
+    if (function == mon_thread_sleep_param || function == conn_fail_sleep) {
         found = true;
-        status = (int)getDoubleParam(mon_thread_sleep_param, value);
+        status = (int)getDoubleParam(function, value);
     } else {
         try
         {
@@ -747,7 +761,7 @@ asynStatus CAENHVAsyn::writeFloat64(asynUser *pasynUser, epicsFloat64 value)
     bool found = false;
 
     // Look for the function number in the parameter lists
-    if (function == mon_thread_sleep_param) {
+    if (function == mon_thread_sleep_param || function == conn_fail_sleep) {
         found = true;
         status = setDoubleParam(function, value);
     } else {
