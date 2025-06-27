@@ -72,7 +72,7 @@ public:
 
 private:
 
-    int  InitSystem() const;
+    int  InitSystem();
     void GetPropList();
     void GetCrateMap();
 
@@ -81,6 +81,7 @@ private:
 
     int handle;
     int systemType_;
+    bool validHandle_ = false;
     std::string ipAddr_, userName_, password_;
 
     // Number of slot in the crate

@@ -157,7 +157,7 @@ ICrate::~ICrate()
 {
 }
 
-int ICrate::InitSystem() const
+int ICrate::InitSystem()
 {
     int h;
     std::string functionName("initSystem");
@@ -177,6 +177,7 @@ int ICrate::InitSystem() const
     if( r != CAENHV_OK )
         throw std::runtime_error(retMessage.str().c_str());
 
+    this->validHandle_ = true;
     return h;
 }
 
@@ -188,9 +189,9 @@ int ICrate::InitSystem() const
  */
 void ICrate::ReinitSystem() {
 
-    if (this->handle != -1) {
+    if (this->validHandle_) {
         CAENHV_DeinitSystem(this->handle);
-        this->handle = -1;
+        this->validHandle_ = false;
     }
     this->handle = this->InitSystem();
 
