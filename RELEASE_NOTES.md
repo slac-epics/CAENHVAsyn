@@ -3,6 +3,9 @@
 Release notes for the CAENHVAsyn EPICS Module.
 
 ## Releases:
+* __R2.1.0__: 2025-06-30 lorelli
+  * Add reconnection mechanism (#13) by marcomontevechi1
+
 * __R2.0.1__: 2025-03-06 lorelli
   * Upgrade to asyn/R4.39-1.0.2
   * Configuration changes for rhel9 support
