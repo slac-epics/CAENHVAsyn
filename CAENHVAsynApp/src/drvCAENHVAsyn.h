@@ -49,6 +49,7 @@
 #include <dbStaticLib.h>
 #include "asynPortDriver.h"
 #include <epicsExport.h>
+#include "epicsAtomic.h"
 
 #include "CAENHVWrapper.h"
 #include "common.h"
@@ -126,6 +127,9 @@ class CAENHVAsyn : public asynPortDriver
         virtual asynStatus readInt32          (asynUser *pasynUser, epicsInt32 *value);
         virtual asynStatus writeInt32         (asynUser *pasynUser, epicsInt32 value);
 
+        //Connection monitor task to be called inside epicsThread
+        void connMon();
+
         // EPICS record prefix. Use for autogeneration of PVs.
         static std::string epicsPrefix;
         // Crate information output file location
@@ -151,6 +155,14 @@ class CAENHVAsyn : public asynPortDriver
 
         // Crate object
         Crate crate;
+
+        //Reconnection monitor and processing
+        asynStatus createReconnParams();
+        int fail_count_limit;
+        int allowed_fails_param;
+        int mon_thread_sleep_param;
+        int conn_fail_sleep;
+        int failed_gets{0};
 
        // System property lists
        std::map<int, SystemPropertyInteger> systemPropertyIntegerList;

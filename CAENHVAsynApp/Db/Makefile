@@ -19,6 +19,7 @@ DB += stringin.template
 DB += stringout.template
 DB += longin.template
 DB += longout.template
+DB += reconnection.db
 
 #----------------------------------------------------
 # If <anyname>.db template is not named <anyname>*.template add
