@@ -421,6 +421,10 @@ CAENHVAsyn::CAENHVAsyn(const std::string& portName, int systemType, const std::s
 
         for(std::vector<Channel>::iterator channelIt = c.begin(); channelIt != c.end(); ++channelIt)
         {
+            std::vector<ChannelParameterString> cps = (*channelIt)->getChannelParameterStrings();
+            for (std::vector<ChannelParameterString>::iterator paramIt = cps.begin(); paramIt != cps.end(); ++paramIt)
+                createParamString<ChannelParameterString>(*paramIt, channelParameterStringList);
+
             std::vector<ChannelParameterNumeric> cpn = (*channelIt)->getChannelParameterNumerics();
             for (std::vector<ChannelParameterNumeric>::iterator paramIt = cpn.begin(); paramIt != cpn.end(); ++paramIt)
                 createParamFloat<ChannelParameterNumeric>(*paramIt, channelParameterNumericList);
@@ -1010,7 +1014,8 @@ asynStatus CAENHVAsyn::readOctet(asynUser *pasynUser, char *value, size_t maxCha
     getParamName(addr, function, &name);
 
     // Iterators
-    std::map< int, SystemPropertyString >::iterator spIt;
+    std::map< int, SystemPropertyString   >::iterator spIt;
+    std::map< int, ChannelParameterString >::iterator cpIt;
 
     // Check if the function is found in out lists
     bool found = false;
@@ -1018,12 +1023,22 @@ asynStatus CAENHVAsyn::readOctet(asynUser *pasynUser, char *value, size_t maxCha
     // Look for the function number in the parameter lists
     try
     {
+        std::string temp;
         if ( ( spIt = systemPropertyStringList.find(function) ) != systemPropertyStringList.end() )
         {
-            std::string temp = spIt->second->getVal();
+            temp = spIt->second->getVal();
+            found = true;
+        }
+
+        if ((cpIt = channelParameterStringList.find(function)) != channelParameterStringList.end())
+        {
+            temp = cpIt->second->getVal();
+            found = true;
+        }
+
+        if (found) {
             strcpy(value, temp.c_str());
             *nActual = temp.length() + 1;
-            found = true;
         }
     }
     catch(std::runtime_error& e)
@@ -1071,7 +1086,8 @@ asynStatus CAENHVAsyn::writeOctet(asynUser *pasynUser, const char *value, size_t
     getParamName(addr, function, &name);
 
     // Iterators
-    std::map< int, SystemPropertyString >::iterator spIt;
+    std::map< int, SystemPropertyString   >::iterator spIt;
+    std::map< int, ChannelParameterString >::iterator cpIt;
 
     // Check if the function is found in out lists
     bool found = false;
@@ -1079,11 +1095,19 @@ asynStatus CAENHVAsyn::writeOctet(asynUser *pasynUser, const char *value, size_t
     // Look for the function number in the parameter lists
     try
     {
+        std::string temp(value);
+
         if ( ( spIt = systemPropertyStringList.find(function) ) != systemPropertyStringList.end() )
         {
             found = true;
-            std::string temp(value);
             spIt->second->setVal(temp);
+            *nActual = temp.size();
+        }
+
+        if ((cpIt = channelParameterStringList.find(function)) != channelParameterStringList.end())
+        {
+            found = true;
+            cpIt->second->setVal(temp);
             *nActual = temp.size();
         }
     }

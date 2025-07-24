@@ -176,6 +176,7 @@ class CAENHVAsyn : public asynPortDriver
        std::map<int, BoardParameterBdStatus> boardParameterBdStatusList;
 
        // Channel parameter lists
+       std::map<int, ChannelParameterString>   channelParameterStringList;
        std::map<int, ChannelParameterNumeric>  channelParameterNumericList;
        std::map<int, ChannelParameterOnOff>    channelParameterOnOffList;
        std::map<int, ChannelParameterChStatus> channelParameterChStatusList;

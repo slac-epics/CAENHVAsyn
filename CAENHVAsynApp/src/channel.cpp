@@ -40,6 +40,10 @@ void IChannel::printInfo(std::ostream& stream) const
     stream << "      Slot = " << slot \
            << ", Channel = " << channel \
            << std::endl;
+    
+    stream << "        Number of String parameters: " << channelParameterStrings.size() << std::endl;
+    for (std::vector<ChannelParameterString>::const_iterator it = channelParameterStrings.begin(); it != channelParameterStrings.end(); ++it)
+        (*it)->printInfo(stream);
 
     stream << "        Number of Numeric parameters: " << channelParameterNumerics.size() << std::endl;
     for (std::vector<ChannelParameterNumeric>::const_iterator it = channelParameterNumerics.begin(); it != channelParameterNumerics.end(); ++it)
@@ -75,6 +79,9 @@ void IChannel::GetChannelParams()
 
     if ( r != CAENHV_OK )
         return;
+
+    // Get the channel name
+    channelParameterStrings.push_back( IChannelName::create(handle, slot, channel, "NAME", PARAM_MODE_RDWR) );
 
     // Check if we the number of parameter is > 0
     if (ParNumber <= 0)
