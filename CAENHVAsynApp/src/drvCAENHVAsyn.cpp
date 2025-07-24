@@ -341,9 +341,9 @@ CAENHVAsyn::CAENHVAsyn(const std::string& portName, int systemType, const std::s
             throw std::runtime_error("Invalid IP address");
     }
 
-    // Only SYx527 are supported at the
-    if ( (systemType < 0) || (systemType > 3) )
-        throw std::runtime_error("Unsupported system type. Only supported types are SYx527 (0-3)");
+    // Only SYx527 and SMART HV are supported at the moment
+    if ( ( (systemType < 0) || (systemType > 3) ) && systemType != 13 )
+        throw std::runtime_error("Unsupported system type. Only supported types are SYx527 (0-3) and SMART HV (13)");
 
     // Create a Crate object
     crate = ICrate::create(systemType, ipAddr, userName, password);
@@ -431,7 +431,12 @@ CAENHVAsyn::CAENHVAsyn(const std::string& portName, int systemType, const std::s
 
             std::vector<ChannelParameterChStatus> cpcs = (*channelIt)->getChannelParameterChStatuses();
             for (std::vector<ChannelParameterChStatus>::iterator paramIt = cpcs.begin(); paramIt != cpcs.end(); ++paramIt)
-                createParamMBinary<ChannelParameterChStatus>(*paramIt, channelParameterChStatusList, recordFieldChParamChStatus);
+                if ( (systemType >= 0) && (systemType<=3) ){
+                    createParamMBinary<ChannelParameterChStatus>(*paramIt, channelParameterChStatusList, recordFieldChParamChStatusX527);
+                }
+                else if (systemType == 13){
+                    createParamMBinary<ChannelParameterChStatus>(*paramIt, channelParameterChStatusList, recordFieldChParamChStatusSMART);
+                }
 
             std::vector<ChannelParameterBinary> cpb = (*channelIt)->getChannelParameterBinaries();
             for (std::vector<ChannelParameterBinary>::iterator paramIt = cpb.begin(); paramIt != cpb.end(); ++paramIt)
