@@ -141,9 +141,9 @@ void ICrate::GetCrateMap()
 
 ICrate::ICrate(int systemType, const std::string& ipAddr, const std::string& userName, const std::string& password)
 :
-  handle(-1)
+  handle(-1), systemType_(systemType), ipAddr_(ipAddr), userName_(userName), password_(password)
 {
-    handle = InitSystem(systemType, ipAddr, userName, password);
+    handle = InitSystem();
     GetPropList();
     GetCrateMap();
 }
@@ -157,16 +157,16 @@ ICrate::~ICrate()
 {
 }
 
-int ICrate::InitSystem(int systemType, const std::string& ipAddr, const std::string& userName, const std::string& password) const
+int ICrate::InitSystem()
 {
     int h;
     std::string functionName("initSystem");
 
-    CAENHVRESULT r = CAENHV_InitSystem( static_cast<CAENHV_SYSTEM_TYPE_t>(systemType),
+    CAENHVRESULT r = CAENHV_InitSystem( static_cast<CAENHV_SYSTEM_TYPE_t>(this->systemType_),
                                         LINKTYPE_TCPIP,
-                                        const_cast<void*>( static_cast<const void*>( ipAddr.c_str() ) ),
-                                        userName.c_str(),
-                                        password.c_str(),
+                                        const_cast<void*>( static_cast<const void*>( this->ipAddr_.c_str() ) ),
+                                        this->userName_.c_str(),
+                                        this->password_.c_str(),
                                         &h );
 
     std::stringstream retMessage;
@@ -177,9 +177,25 @@ int ICrate::InitSystem(int systemType, const std::string& ipAddr, const std::str
     if( r != CAENHV_OK )
         throw std::runtime_error(retMessage.str().c_str());
 
+    this->validHandle_ = true;
     return h;
 }
 
+/**
+ * @brief Reinitializes system in case connection was lost.
+ * Assumes system is the same, so doesn't call GetPropList() or GetCrateMap()
+ *
+ * @param pasynUser pointer to asynUser to be used by asynPrint
+ */
+void ICrate::ReinitSystem() {
+
+    if (this->validHandle_) {
+        CAENHV_DeinitSystem(this->handle);
+        this->validHandle_ = false;
+    }
+    this->handle = this->InitSystem();
+
+}
 
 void ICrate::printInfo(std::ostream& stream) const
 {

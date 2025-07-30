@@ -1,0 +1,65 @@
+# Count limit to start system reconnection
+record(ao, "$(P)$(R)CountLimit") {
+    field(DESC, "Set failed count limit")
+    field(VAL,  "500")
+    field(DTYP, "asynInt32")
+    field(FLNK, "$(P)$(R)CountLimit_RBV")
+    field(OUT,  "@asyn($(PORT),$(ADDR=0),$(TIMEOUT=1))FAILED_COUNT_LIMIT")
+}
+
+record(ai, "$(P)$(R)CountLimit_RBV") {
+    field(DESC, "Get failed count limit")
+    field(PINI, "YES")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT),$(ADDR=0),$(TIMEOUT=1))FAILED_COUNT_LIMIT")
+}
+
+# Allowed fails to trigger reconnection
+record(ao, "$(P)$(R)AllowedFails") {
+    field(DESC, "Number of fails to trigger reconnection")
+    field(VAL,  "10")
+    field(DTYP, "asynInt32")
+    field(FLNK, "$(P)$(R)AllowedFails_RBV")
+    field(OUT,  "@asyn($(PORT),$(ADDR=0),$(TIMEOUT=1))ALLOWED_FAILS")
+}
+
+record(ai, "$(P)$(R)AllowedFails_RBV") {
+    field(DESC, "Number of fails to trigger reconnection")
+    field(PINI, "YES")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT),$(ADDR=0),$(TIMEOUT=1))ALLOWED_FAILS")
+}
+
+# Time that monitor thread sleeps before checking on connection
+# Status again
+record(ao, "$(P)$(R)MonThreadSleep") {
+    field(DESC, "Time for thread monitor to sleep")
+    field(VAL,  "1")
+    field(DTYP, "asynFloat64")
+    field(FLNK, "$(P)$(R)MonThreadSleep_RBV")
+    field(OUT,  "@asyn($(PORT),$(ADDR=0),$(TIMEOUT=1))MON_THREAD_SLEEP")
+}
+
+record(ai, "$(P)$(R)MonThreadSleep_RBV") {
+    field(DESC, "Time for thread monitor to sleep")
+    field(PINI, "YES")
+    field(DTYP, "asynFloat64")
+    field(INP,  "@asyn($(PORT),$(ADDR=0),$(TIMEOUT=1))MON_THREAD_SLEEP")
+}
+
+# Time to sleep before trying reconnection again if reconnection
+# failed
+record(ao, "$(P)$(R)RecFailSleep") {
+    field(DESC, "Sleep before trying reconn after fail")
+    field(VAL,  "5")
+    field(DTYP, "asynFloat64")
+    field(FLNK, "$(P)$(R)RecFailSleep_RBV")
+    field(OUT,  "@asyn($(PORT),$(ADDR=0),$(TIMEOUT=1))CONN_FAIL_SLEEP")
+}
+
+record(ai, "$(P)$(R)RecFailSleep_RBV") {
+    field(DESC, "Sleep before trying reconn after fail")
+    field(PINI, "YES")
+    field(DTYP, "asynFloat64")
+    field(INP,  "@asyn($(PORT),$(ADDR=0),$(TIMEOUT=1))CONN_FAIL_SLEEP")
+}
