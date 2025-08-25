@@ -36,7 +36,14 @@
 #include <fstream>
 #define __STDC_FORMAT_MACROS
 #include <inttypes.h>
+
+#ifdef _WIN32
+#include <winsock2.h>
+#include <ws2tcpip.h>
+#else
 #include <arpa/inet.h>
+#endif
+
 #include <epicsTypes.h>
 #include <epicsTime.h>
 #include <epicsThread.h>

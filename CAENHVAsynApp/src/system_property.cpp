@@ -93,13 +93,15 @@ void ISystemPropertyString::setVal(const std::string& v) const
     if (mode == SYSPROP_MODE_RDONLY)
         return;
 
-    char temp[v.size() + 1];
+    char* temp = new char[v.size() + 1];
     strcpy(temp, v.c_str());
 
     CAENHVRESULT r = CAENHV_SetSysProp(handle, prop.c_str(), temp);
 
     if ( r != CAENHV_OK && r != CAENHV_GETPROPNOTIMPL && r != CAENHV_NOTGETPROP )
         throw std::runtime_error("CAENHV_SetSysProp failed: " + std::string(CAENHV_GetError(handle)));
+
+    delete[] temp;
 }
 
 // Float class

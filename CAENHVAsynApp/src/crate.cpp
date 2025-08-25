@@ -81,7 +81,10 @@ void ICrate::GetPropList()
         }
     }
 
+    // Memory allocated across CRTs can cause issues on Windows
+    #ifndef _WIN32
     free(PropNameList);
+    #endif
 }
 
 void ICrate::GetCrateMap()
@@ -130,6 +133,8 @@ void ICrate::GetCrateMap()
         }
     }
 
+    // Memory allocated across CRTs can cause issues on Windows
+    #ifndef _WIN32
     // Deallocate memory (Use RAII in the future for this)
     free(NrOfChList);
     free(ModelList);
@@ -137,6 +142,7 @@ void ICrate::GetCrateMap()
     free(SerNumList);
     free(FmwRelMinList);
     free(FmwRelMaxList);
+    #endif
 }
 
 ICrate::ICrate(int systemType, const std::string& ipAddr, const std::string& userName, const std::string& password)
