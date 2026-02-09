@@ -93,7 +93,7 @@ void ICrate::GetCrateMap()
     unsigned short *NrOfChList;
     char *ModelList;
     char *DescriptionList;
-    unsigned short *SerNumList;
+    unsigned int *SerNumList;
     unsigned char *FmwRelMinList;
     unsigned char *FmwRelMaxList;
 
