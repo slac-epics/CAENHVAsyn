@@ -109,7 +109,7 @@ void ICrate::GetCrateMap()
 
 
     numSlots = NrOfSlot;
-    char *m = ModelList, *d = ModelList;
+    char *m = ModelList, *d = DescriptionList;
 
     for (std::size_t i(0); i < NrOfSlot; ++i, m += strlen(m) + 1, d += strlen(d) + 1)
     {
