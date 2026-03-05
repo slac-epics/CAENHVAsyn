@@ -3,6 +3,12 @@
 Release notes for the CAENHVAsyn EPICS Module.
 
 ## Releases:
+* pre-release:
+  * 2026-02-09 anderslindho
+    * Bug fix: board description in GetCrateMap (PR #14)
+  * 2025-07-30 Pedro Nariyoshi (nariox)
+    * Added support for Smart HV (PR #12)
+
 * __R2.1.0__: 2025-06-30 lorelli
   * Add reconnection mechanism (#13) by marcomontevechi1
 
