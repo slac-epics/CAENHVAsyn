@@ -1,0 +1,54 @@
+# CAEN A7030 12/24/36/48 channel 3 kV/1 mA power supply board
+#
+# Required macros:
+#    P     - Prefix
+#    PORT  - Asyn port name
+#    SLOT  - Slot number, must be two digits ("01" for slot 1)
+#    SCAN  - SCAN interval for input records
+#
+# Available Parameters (extracted from debug dump file "CAENHVAsyn_CaenPort_crateInfo.txt")
+#
+#    Name         Asyn parameter           Type      Mode  Min   Max   Unit
+#    ----------------------------------------------------------------------
+#
+#    Status       S$(SLOT)_BDSTATUS        Int       RO      -     -      -
+#    HVMax        S$(SLOT)_HVMAX           Float     RO      0  3200      V
+#    HIMax        S$(SLOT)_HIMAX           Float     RO      0  1050     uA
+#    Temp         S$(SLOT)_TEMP            Float     RO      5    65      C
+#    ClrAlarm     S$(SLOT)_CLRALARM        Bool      RW      -     -      -
+
+
+# Board status bits
+#    Bit 0:       Power-fail status
+#    Bit 1:       Firmware checksum error
+#    Bit 2:       HVMax calibration error
+#    Bit 3:       Temperature calibration error
+#    Bit 4:       Under-temperature (< 5 degrees C)
+#    Bit 5:       Over-temperature (> 64 degrees C)
+#    Bit 6-31:    Reserved, forced to 0
+file bi.template {
+    pattern { R,               PARAM,                DESC,                             ZNAM,  ONAM,   MASK,  SCAN    }
+            { "Status-PF",     "S$(SLOT)_BDSTATUS",  "Power fail",                     "No",  "Yes",  "1",   $(SCAN) }
+            { "Status-FCE",    "S$(SLOT)_BDSTATUS",  "Firmware checksum error",        "No",  "Yes",  "2",   $(SCAN) }
+            { "Status-CEHV",   "S$(SLOT)_BDSTATUS",  "HVMax calibration error",        "No",  "Yes",  "4",   $(SCAN) }
+            { "Status-CET",    "S$(SLOT)_BDSTATUS",  "Temperature calibration error",  "No",  "Yes",  "8",   $(SCAN) }
+            { "Status-UT",     "S$(SLOT)_BDSTATUS",  "Under temperature",              "No",  "Yes",  "16",  $(SCAN) }
+            { "Status-OT",     "S$(SLOT)_BDSTATUS",  "Over temperature",               "No",  "Yes",  "32",  $(SCAN) }
+}
+
+file ai.template {
+    pattern { R,               PARAM,                DESC,                              EGU,   LOPR,   HOPR,    SCAN    }
+            { "HIMax",         "S$(SLOT)_HIMAX",     "Hardware current limit",          "uA",  "0",    "1050",  $(SCAN) }
+            { "HVMax",         "S$(SLOT)_HVMAX",     "Hardware voltage limit",          "V",   "0",    "3200",  $(SCAN) }
+            { "Temp",          "S$(SLOT)_TEMP",      "Board temperature",               "C",   "5",    "65",    $(SCAN) }
+}
+
+file bo.template {
+    pattern { R,               PARAM,                DESC,                              ZNAM,  ONAM,   MASK }
+            { "ClrAlarm",      "S$(SLOT)_CLRALARM",  "Clear board alarms",              "No",  "Yes",  "1"  }
+}
+
+file bi.template {
+    pattern { R,               PARAM,                DESC,                              ZNAM,  ONAM,   MASK,    SCAN    }
+            { "ClrAlarm-RB",   "S$(SLOT)_CLRALARM",  "Clear board alarms",              "No",  "Yes",  "1",     $(SCAN) }
+}

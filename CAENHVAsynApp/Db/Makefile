@@ -21,6 +21,17 @@ DB += longin.template
 DB += longout.template
 DB += reconnection.db
 
+DB += A1589-board.substitutions
+DB += A1589-channel.substitutions
+DB += A2519-board.substitutions
+DB += A2519-channel.substitutions
+DB += A2552-board.substitutions
+DB += A2552-channel.substitutions
+DB += A7030-board.substitutions
+DB += A7030-channel.substitutions
+DB += A7030DP-channel.substitutions
+DB += SYx527.substitutions
+
 #----------------------------------------------------
 # If <anyname>.db template is not named <anyname>*.template add
 # <anyname>_template = <templatename>

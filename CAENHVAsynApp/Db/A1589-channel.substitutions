@@ -1,0 +1,100 @@
+# CAEN A1589 +/-2.5 kV/500 uA quadrant bipolar channel
+#
+# Required macros:
+#    P       - Prefix
+#    PORT    - Asyn port name
+#    SLOT    - Slot number, must be two digits ("01" for slot 1)
+#    CHANNEL - Channel number, must be two digits ("01" for channel 1)
+#    SCAN    - SCAN interval for input records
+#
+# Available Parameters (extracted from debug dump file "CAENHVAsyn_CaenPort_crateInfo.txt")
+#
+#    Name         Asyn parameter                 Type      Mode  Min   Max   Unit
+#    -------------------------------------------------------------------------
+#    Status       S$(SLOT)_C$(CHANNEL)_STATUS    Int       RO      -     -      -
+#    V0Set        S$(SLOT)_C$(CHANNEL)_V0SET     Float     RW  -2500  2500      V
+#    I0Set        S$(SLOT)_C$(CHANNEL)_I0SET     Float     RW   -500   500     uA
+#    RUp          S$(SLOT)_C$(CHANNEL)_RUP       Float     RW      1   500    V/s
+#    RDWn         S$(SLOT)_C$(CHANNEL)_RDWN      Float     RW      1   500    V/s
+#    Trip         S$(SLOT)_C$(CHANNEL)_TRIP      Float     RW      0  1000      s
+#    SVMax        S$(SLOT)_C$(CHANNEL)_SVMAX     Float     RW  -2500  2500      V
+#    VMon         S$(SLOT)_C$(CHANNEL)_VMON      Float     RO      0  2500      V
+#    IMon         S$(SLOT)_C$(CHANNEL)_IMON      Float     RO      0   500     uA
+#    Pw           S$(SLOT)_C$(CHANNEL)_PW        Bool      RW      -     -      -
+#    PDwn         S$(SLOT)_C$(CHANNEL)_PDWN      Bool      RW      -     -      -
+#    TripInt      S$(SLOT)_C$(CHANNEL)_TRIPINT   Bool      RW      -     -      -
+#    TripExt      S$(SLOT)_C$(CHANNEL)_TRIPEXT   Bool      RW      -     -      -
+
+
+# Channel status bits
+#    Bit 0:       Channel is on
+#    Bit 1:       Channel is ramping up
+#    Bit 2:       Channel is ramping down
+#    Bit 3:       Overcurrent
+#    Bit 4:       Overvoltage
+#    Bit 5:       Undervoltage
+#    Bit 6:       External trip
+#    Bit 7:       Max voltage reached
+#    Bit 8:       External disable
+#    Bit 9:       Internal trip
+#    Bit 10:      Calibration error
+#    Bit 11:      Channel is unplugged
+#    Bit 12-31:   Reserved, forced to 0
+file bi.template {
+    pattern { R,              PARAM,                          DESC,                          ZNAM,  ONAM,   MASK,    SCAN    }
+            { "Status-ON",    "S$(SLOT)_C$(CHANNEL)_STATUS",  "Channel is On",               "No",  "Yes",  "1",     $(SCAN) }
+            { "Status-RU",    "S$(SLOT)_C$(CHANNEL)_STATUS",  "Ramping up",                  "No",  "Yes",  "2",     $(SCAN) }
+            { "Status-RD",    "S$(SLOT)_C$(CHANNEL)_STATUS",  "Ramping down",                "No",  "Yes",  "4",     $(SCAN) }
+            { "Status-OC",    "S$(SLOT)_C$(CHANNEL)_STATUS",  "Overcurrent",                 "No",  "Yes",  "8",     $(SCAN) }
+            { "Status-OV",    "S$(SLOT)_C$(CHANNEL)_STATUS",  "Overvoltage",                 "No",  "Yes",  "16",    $(SCAN) }
+            { "Status-UV",    "S$(SLOT)_C$(CHANNEL)_STATUS",  "Undervoltage",                "No",  "Yes",  "32",    $(SCAN) }
+            { "Status-ET",    "S$(SLOT)_C$(CHANNEL)_STATUS",  "External trip",               "No",  "Yes",  "64",    $(SCAN) }
+            { "Status-MV",    "S$(SLOT)_C$(CHANNEL)_STATUS",  "Max voltage reached",         "No",  "Yes",  "128",   $(SCAN) }
+            { "Status-ED",    "S$(SLOT)_C$(CHANNEL)_STATUS",  "External disable",            "No",  "Yes",  "256",   $(SCAN) }
+            { "Status-IT",    "S$(SLOT)_C$(CHANNEL)_STATUS",  "Internal trip",               "No",  "Yes",  "512",   $(SCAN) }
+            { "Status-CE",    "S$(SLOT)_C$(CHANNEL)_STATUS",  "Calibration error",           "No",  "Yes",  "1024",  $(SCAN) }
+            { "Status-UN",    "S$(SLOT)_C$(CHANNEL)_STATUS",  "Unplugged",                   "No",  "Yes",  "2048",  $(SCAN) }
+}
+
+# Measurements
+file ai.template {
+    pattern { R,              PARAM,                          DESC,                          EGU,   LOPR,  HOPR,     SCAN    }
+            { "VMon",         "S$(SLOT)_C$(CHANNEL)_VMON",    "Monitored voltage",           "V",   "0",   "2500",   $(SCAN) }
+            { "IMon",         "S$(SLOT)_C$(CHANNEL)_IMON",    "Monitored current",           "uA",  "0",   "500",    $(SCAN) }
+}
+
+# Numeric settings
+file ao.template {
+    pattern { R,              PARAM,                          DESC,                          EGU,    LOPR,     HOPR,    DRVL,     DRVH   }
+            { "V0Set",        "S$(SLOT)_C$(CHANNEL)_V0SET",   "First voltage setting",       "V",    "-2500",  "2500",  "-2500",  "2500" }
+            { "I0Set",        "S$(SLOT)_C$(CHANNEL)_I0SET",   "First current limit",         "uA",   "-500",   "500",   "-500",   "500"  }
+            { "RUp",          "S$(SLOT)_C$(CHANNEL)_RUP",     "Ramp-up speed",               "V/s",  "1",      "500",   "1",      "500"  }
+            { "RDwn",         "S$(SLOT)_C$(CHANNEL)_RDWN",    "Ramp-down speed",             "V/s",  "1",      "500",   "1",      "500"  }
+            { "Trip",         "S$(SLOT)_C$(CHANNEL)_TRIP",    "Overcurrent trip time",       "s",    "0",      "1000",  "0",      "1000" }
+            { "SVMax",        "S$(SLOT)_C$(CHANNEL)_SVMAX",   "Software voltage limit",      "V",    "-2500",  "2500",  "-2500",  "2500" }
+}
+
+# Numeric settings - readback
+file ai.template {
+    pattern { R,              PARAM,                          DESC,                          EGU,    LOPR,     HOPR,    SCAN    }
+            { "V0Set-RB",     "S$(SLOT)_C$(CHANNEL)_V0SET",   "First voltage setting",       "V",    "-2500",  "2500",  $(SCAN) }
+            { "I0Set-RB",     "S$(SLOT)_C$(CHANNEL)_I0SET",   "First current limit",         "uA",   "-500",   "500",   $(SCAN) }
+            { "RUp-RB",       "S$(SLOT)_C$(CHANNEL)_RUP",     "Ramp-up speed",               "V/s",  "1",      "500",   $(SCAN) }
+            { "RDwn-RB",      "S$(SLOT)_C$(CHANNEL)_RDWN",    "Ramp-down speed",             "V/s",  "1",      "500",   $(SCAN) }
+            { "Trip-RB",      "S$(SLOT)_C$(CHANNEL)_TRIP",    "Overcurrent trip time",       "s",    "0",      "1000",  $(SCAN) }
+            { "SVMax-RB",     "S$(SLOT)_C$(CHANNEL)_SVMAX",   "Software voltage limit",      "V",    "-2500",  "2500",  $(SCAN) }
+}
+
+# Boolean settings
+file bo.template {
+    pattern { R,              PARAM,                          DESC,                          ZNAM,    ONAM,    MASK }
+            { "Pw",           "S$(SLOT)_C$(CHANNEL)_PW",      "Power on/off",                "Off",   "On",    "1"  }
+            { "PDwn",         "S$(SLOT)_C$(CHANNEL)_PDWN",    "Power-down option",           "Kill",  "Ramp",  "1"  }
+}
+
+# Boolean settings - readback
+file bi.template {
+    pattern { R,              PARAM,                          DESC,                          ZNAM,     ONAM,    MASK,  SCAN    }
+            { "Pw-RB",        "S$(SLOT)_C$(CHANNEL)_PW",      "Power on/off",                "Off",    "On",    "1",   $(SCAN) }
+            { "PDwn-RB",      "S$(SLOT)_C$(CHANNEL)_PDWN",    "Power-down option",           "Kill",   "Ramp",  "1",   $(SCAN) }
+}
