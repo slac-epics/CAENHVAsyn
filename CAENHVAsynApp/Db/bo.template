@@ -1,8 +1,8 @@
 record(bo,      "$(P)$(R)") {
     field(DTYP, "asynUInt32Digital")
     field(DESC, "$(DESC)")
-    field(PINI, "YES")
-    field(SCAN, "Passive")
+    field(PINI, "$(PINI=NO)")
+    field(SCAN, "$(SCAN=Passive)")
     field(OUT,  "@asynMask($(PORT),0,$(MASK))$(PARAM)")
     field(ZNAM, "$(ZNAM)")
     field(ONAM, "$(ONAM)")

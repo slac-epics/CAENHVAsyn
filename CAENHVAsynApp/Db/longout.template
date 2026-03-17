@@ -1,8 +1,8 @@
 record(longout, "$(P)$(R)") {
     field(DTYP, "asynInt32")
     field(DESC, "$(DESC)")
-    field(PINI, "YES")
-    field(SCAN, "Passive")
+    field(PINI, "$(PINI=NO)")
+    field(SCAN, "$(SCAN=Passive)")
     field(OUT,  "@asyn($(PORT))$(PARAM)")
     info(autosaveFields, "VAL")
 }

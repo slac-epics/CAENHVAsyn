@@ -1,9 +1,9 @@
 record(ao,      "$(P)$(R)") {
-    field(PINI, "YES")
-    field(PREC, "2")
+    field(PINI, "$(PINI=NO)")
+    field(PREC, "$(PREC=2)")
     field(DESC, "$(DESC)")
     field(DTYP, "asynFloat64")
-    field(SCAN, "Passive")
+    field(SCAN, "$(SCAN=Passive)")
     field(EGU,  "$(EGU)")
     field(LOPR, "$(LOPR)")
     field(HOPR, "$(HOPR)")

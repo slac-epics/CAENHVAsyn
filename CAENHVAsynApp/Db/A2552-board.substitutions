@@ -1,0 +1,52 @@
+# CAEN A2552 8-channel 0-16V / 6A power supply board
+#
+# Required macros:
+#    P     - Prefix
+#    PORT  - Asyn port name
+#    SLOT  - Slot number, must be two digits ("01" for slot 1)
+#    SCAN  - SCAN interval for input records
+#
+# Available Parameters (extracted from debug dump file "CAENHVAsyn_CaenPort_crateInfo.txt")
+#
+#    Name         Asyn parameter           Type      Mode  Min   Max   Unit
+#    ----------------------------------------------------------------------
+#
+#    BdStatus     S$(SLOT)_BDSTATUS        Int       RO      -     -      -
+#    IntckA       S$(SLOT)_INTCKA          Bool      RW      -     -      -
+#    IntckB       S$(SLOT)_INTCKB          Bool      RW      -     -      -
+#    ClrAlarm     S$(SLOT)_CLRALARM        Bool      RW      -     -      -
+
+
+# Board status bits
+#    Bit 0:       Power-fail status
+#    Bit 1:       Firmware checksum error
+#    Bit 2:       HVMax calibration error
+#    Bit 3:       Temperature calibration error
+#    Bit 4:       Under-temperature (< 5 degrees C)
+#    Bit 5:       Over-temperature (> 65 degrees C)
+#    Bit 6-31:    Reserved, forced to 0
+file bi.template {
+    pattern { R,                PARAM,                DESC,                             ZNAM,  ONAM,   MASK,  SCAN    }
+            { "Status-PF",      "S$(SLOT)_BDSTATUS",  "Power fail",                     "No",  "Yes",  "1",   $(SCAN) }
+            { "Status-FCE",     "S$(SLOT)_BDSTATUS",  "Firmware checksum error",        "No",  "Yes",  "2",   $(SCAN) }
+            { "Status-CEHV",    "S$(SLOT)_BDSTATUS",  "HVMax calibration error",        "No",  "Yes",  "4",   $(SCAN) }
+            { "Status-CET",     "S$(SLOT)_BDSTATUS",  "Temperature calibration error",  "No",  "Yes",  "8",   $(SCAN) }
+            { "Status-UT",      "S$(SLOT)_BDSTATUS",  "Under temperature",              "No",  "Yes",  "16",  $(SCAN) }
+            { "Status-OT",      "S$(SLOT)_BDSTATUS",  "Over temperature",               "No",  "Yes",  "32",  $(SCAN) }
+}
+
+# Boolean settings
+file bo.template {
+    pattern { R,                PARAM,                DESC,                             ZNAM,        ONAM,       MASK }
+            { "IntckA",         "S$(SLOT)_INTCKA",    "Section A interlock enable",     "Disabled",  "Enabled",  "1"  }
+            { "IntckB",         "S$(SLOT)_INTCKB",    "Section B interlock enable",     "Disabled",  "Enabled",  "1"  }
+            { "ClrAlarm",       "S$(SLOT)_CLRALARM",  "Clear board alarms",             "No",        "Yes",      "1"  }
+}
+
+# Boolean settings - readback
+file bi.template {
+    pattern { R,                PARAM,                DESC,                             ZNAM,        ONAM,       MASK,  SCAN    }
+            { "IntckA-RB",      "S$(SLOT)_INTCKA",    "Section A interlock enable",     "Disabled",  "Enabled",  "1"    $(SCAN) }
+            { "IntckB-RB",      "S$(SLOT)_INTCKB",    "Section B interlock enable",     "Disabled",  "Enabled",  "1"    $(SCAN) }
+            { "ClrAlarm-RB",    "S$(SLOT)_CLRALARM",  "Clear board alarms",             "No",        "Yes",      "1",   $(SCAN) }
+}

@@ -1,6 +1,6 @@
 record(ai,      "$(P)$(R)") {
-    field(PINI, "YES")
-    field(PREC, "2")
+    field(PINI, "$(PINI=YES)")
+    field(PREC, "$(PREC=2)")
     field(DESC, "$(DESC)")
     field(DTYP, "asynFloat64")
     field(SCAN, "$(SCAN)")

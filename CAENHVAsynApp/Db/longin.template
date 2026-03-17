@@ -1,7 +1,7 @@
 record(longin,  "$(P)$(R)") {
     field(DTYP, "asynInt32")
     field(DESC, "$(DESC)")
-    field(PINI, "YES")
+    field(PINI, "$(PINI=YES)")
     field(SCAN, "$(SCAN)")
     field(INP,  "@asyn($(PORT))$(PARAM)")
     info(autosaveFields, "VAL")

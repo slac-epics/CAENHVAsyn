@@ -1,7 +1,7 @@
 record(bi,      "$(P)$(R)") {
     field(DTYP, "asynUInt32Digital")
     field(DESC, "$(DESC)")
-    field(PINI, "YES")
+    field(PINI, "$(PINI=YES)")
     field(SCAN, "$(SCAN)")
     field(INP,  "@asynMask($(PORT),0,$(MASK))$(PARAM)")
     field(ZNAM, "$(ZNAM)")

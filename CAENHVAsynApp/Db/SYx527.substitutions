@@ -1,0 +1,55 @@
+# CAEN SY4527/SY5527 power supply system
+#
+# Required macros:
+#    P     - Prefix
+#    PORT  - Asyn port name
+#
+# Available Parameters (extracted from debug dump file "CAENHVAsyn_CaenPort_crateInfo.txt")
+#
+#    Name             Asyn parameter           Type      Mode
+#    --------------------------------------------------------
+#    GenSignCfg       C_GENSIGNCFG             Int       RW
+#    FrontPanIn       C_FRONTPANIN             Int       RO
+#    FrontPanOut      C_FRONTPANOUT            Int       RO
+#    ResFlagCfg       C_RESFLAGCFG             Int       RW
+#    ResFlag          C_RESFLAG                Int       RO
+#    ClkFreq          C_CLKFREQ                Int       RO
+#    OutputLevel      C_OUTPUTLEVEL            Int       RW
+#    CmdQueueStatus   C_CMDQUEUESTATUS         Int       RO
+#    HVFanSpeed       C_HVFANSPEED             Int       RW
+#    DummyReg         C_DUMMYREG               Int       RW
+#    CMDExecMode      C_CMDEXECMODE            Int       RW
+#    Sessions         C_SESSIONS               String    RO
+#    ModelName        C_MODELNAME              String    RO
+#    SwRelease        C_SWRELEASE              String    RO
+#    HvPwSM           C_HVPWSM                 String    RO
+#    HVFanStat        C_HVFANSTAT              String    RO
+#    HVClkConf        C_HVCLKCONF              String    RW
+#    IPAddr           C_IPADDR                 String    RW
+#    IPNetMsk         C_IPNETMSK               String    RW
+#    IPGw             C_IPGW                   String    RW
+#    PWCurrent        C_PWCURRENT              String    RO
+#    SymbolicName     C_SYMBOLICNAME           String    RW
+#    CPULoad          C_CPULOAD                String    RO
+#    MemoryStatus     C_MEMORYSTATUS           String    RO
+#    PWFanStat        C_PWFANSTAT              String    RO
+#    PWVoltage        C_PWVOLTAGE              String    RO
+#    DHCPDStatus      C_DHCPDSTATUS            String    RO
+
+file longin.template {
+    pattern { R,                  PARAM,             DESC,                    SCAN    }
+            { "FrontPanIn",       "C_FRONTPANIN",    "System input status",   $(SCAN) }
+            { "FrontPanOut",      "C_FRONTPANOUT",   "System output status",  $(SCAN) }
+}
+
+file stringout.template {
+    pattern { R,                  PARAM,             DESC,                    NELM,   SCAN      }
+            { "SymbolicName",     "C_SYMBOLICNAME",  "Symbolic name",         "100",  $(SCAN)   }
+}
+
+file stringin.template {
+    pattern { R,                  PARAM,             DESC,                    NELM,   SCAN      }
+            { "SymbolicName-RB",  "C_SYMBOLICNAME",  "Symbolic name",         "100",  $(SCAN)   }
+            { "ModelName",        "C_MODELNAME",     "Model name",            "100",  "Passive" }
+            { "SwRelease",        "C_SWRELEASE",     "Software version",      "100",  "Passive" }
+}
