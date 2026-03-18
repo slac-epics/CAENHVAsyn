@@ -93,7 +93,11 @@ void ICrate::GetCrateMap()
     unsigned short *NrOfChList;
     char *ModelList;
     char *DescriptionList;
+#if CAENHVLIB_VERSION_MAJOR >= 7
+    unsigned int *SerNumList;
+#else
     unsigned short *SerNumList;
+#endif
     unsigned char *FmwRelMinList;
     unsigned char *FmwRelMaxList;
 
